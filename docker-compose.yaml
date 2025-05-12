@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  angular-app:
+    build: D:/ShoRouK/Tasks/devops/DevOps_MVN_Client
+    container_name: angular_app
+    depends_on:
+      - app
+    networks:
+      - app-network
+    ports:
+      - "4200:80"
+  app:
+    build: .
+    container_name: spring-microservice
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/devops
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=Dev_P@ssw0rd
+    depends_on:
+      - db
+    networks:
+      - app-network
+    ports:
+      - "8040:8040"
+  db:
+    image: mysql:8.0
+    container_name: mysql-db
+    ports:
+      - "3305:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: Dev_P@ssw0rd
+      MYSQL_DATABASE: devops
+    networks:
+      - app-network
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
+      timeout: 5s
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
